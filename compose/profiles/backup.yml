@@ -1,0 +1,28 @@
+services:
+  mongodb-backup:
+    image: mongodb/mongodb-database-tools:latest
+    network_mode: host
+    profiles:
+      - backup
+    environment:
+      OMADA_MONGO_BACKUP_USER: ${OMADA_MONGO_BACKUP_USER:-omada_backup}
+      OMADA_MONGO_BACKUP_PASSWORD: ${OMADA_MONGO_BACKUP_PASSWORD:?set OMADA_MONGO_BACKUP_PASSWORD}
+      BACKUP_DIR: /backups
+    volumes:
+      - ../backups:/backups
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        ts="$$(date -u +%Y%m%dT%H%M%SZ)"
+        out="$${BACKUP_DIR}/mongodb/$${ts}"
+        mkdir -p "$${out}"
+        mongodump \
+          --host 127.0.0.1 \
+          --port 27017 \
+          --username "$${OMADA_MONGO_BACKUP_USER}" \
+          --password "$${OMADA_MONGO_BACKUP_PASSWORD}" \
+          --authenticationDatabase admin \
+          --out "$${out}"
+        echo "MongoDB backup written to $${out}"
+

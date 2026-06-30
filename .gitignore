@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+backups/
+certs/*
+!certs/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
+support-bundles/
+seo-research.md
+*.log
+*.tmp
+.DS_Store

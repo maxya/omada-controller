@@ -1,0 +1,10 @@
+# Disabled example only. Do not auto-upgrade Omada controller major versions.
+services:
+  watchtower:
+    image: containrrr/watchtower:latest
+    profiles:
+      - disabled-watchtower-example
+    command: ["--monitor-only", "--label-enable"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+

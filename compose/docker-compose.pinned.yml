@@ -1,0 +1,11 @@
+# Release builds must replace mutable image tags with digest-pinned references.
+# This overlay is intentionally separate from the local source-only workflow.
+#
+# Example:
+# services:
+#   mongodb:
+#     image: mongo:8.0.12@sha256:<digest>
+#   omada-controller:
+#     image: ghcr.io/<owner>/omada-controller:6.2.10.17@sha256:<digest>
+services: {}
+

@@ -1,0 +1,54 @@
+# Example only. Adjust subnet, gateway, parent interface, and controller IP for your LAN.
+name: omada-controller
+
+services:
+  omada-controller:
+    image: local/omada-controller:${OMADA_VERSION:-6.2.10.17}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    networks:
+      omada-lan:
+        ipv4_address: 192.168.1.10
+      omada-internal:
+    environment:
+      OMADA_MONGODB_URI: "mongodb://${OMADA_MONGO_USER:-omada}:${OMADA_MONGO_PASSWORD}@mongodb:27017/omada?authSource=omada"
+    volumes:
+      - omada-data:/opt/omada/data
+      - omada-logs:/opt/omada/logs
+      - ../certs:/cert:ro
+
+  mongodb:
+    image: mongo:8.0
+    command: ["--wiredTigerCacheSizeGB", "${MONGO_CACHE_GB:-0.5}"]
+    networks:
+      - omada-internal
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?set MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: omada
+      OMADA_MONGO_USER: ${OMADA_MONGO_USER:-omada}
+      OMADA_MONGO_PASSWORD: ${OMADA_MONGO_PASSWORD:?set OMADA_MONGO_PASSWORD}
+      OMADA_MONGO_BACKUP_USER: ${OMADA_MONGO_BACKUP_USER:-omada_backup}
+      OMADA_MONGO_BACKUP_PASSWORD: ${OMADA_MONGO_BACKUP_PASSWORD:?set OMADA_MONGO_BACKUP_PASSWORD}
+    volumes:
+      - omada-mongo-data:/data/db
+      - omada-mongo-config:/data/configdb
+      - ../mongodb/init:/docker-entrypoint-initdb.d:ro
+
+networks:
+  omada-internal:
+  omada-lan:
+    driver: macvlan
+    driver_opts:
+      parent: eth0
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24
+          gateway: 192.168.1.1
+
+volumes:
+  omada-data:
+  omada-logs:
+  omada-mongo-data:
+  omada-mongo-config:

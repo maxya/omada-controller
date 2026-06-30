@@ -1,0 +1,13 @@
+.git
+.github
+.env
+.env.*
+backups
+certs
+docs
+support-bundles
+tests
+*.md
+!README.md
+!bootstrap.md
+

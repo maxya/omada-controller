@@ -1,0 +1,86 @@
+name: omada-controller
+
+services:
+  mongodb:
+    image: mongo:8.0
+    command:
+      - "--wiredTigerCacheSizeGB"
+      - "${MONGO_CACHE_GB:-0.5}"
+    stop_grace_period: 90s
+    restart: unless-stopped
+    networks:
+      - omada-internal
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?set MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: omada
+      OMADA_MONGO_USER: ${OMADA_MONGO_USER:-omada}
+      OMADA_MONGO_PASSWORD: ${OMADA_MONGO_PASSWORD:?set OMADA_MONGO_PASSWORD}
+      OMADA_MONGO_BACKUP_USER: ${OMADA_MONGO_BACKUP_USER:-omada_backup}
+      OMADA_MONGO_BACKUP_PASSWORD: ${OMADA_MONGO_BACKUP_PASSWORD:?set OMADA_MONGO_BACKUP_PASSWORD}
+    volumes:
+      - omada-mongo-data:/data/db
+      - omada-mongo-config:/data/configdb
+      - ../mongodb/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --username \"$${MONGO_INITDB_ROOT_USERNAME}\" --password \"$${MONGO_INITDB_ROOT_PASSWORD}\" --authenticationDatabase admin --eval 'db.adminCommand({ ping: 1 }).ok' | grep 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  omada-controller:
+    image: local/omada-controller:${OMADA_VERSION:-6.2.10.17}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        OMADA_VERSION: ${OMADA_VERSION:-6.2.10.17}
+        OMADA_URL: ${OMADA_URL:?set OMADA_URL}
+        OMADA_SHA256: ${OMADA_SHA256:-}
+        OMADA_ARTIFACT_PATH: ${OMADA_ARTIFACT_PATH:-}
+    stop_grace_period: 90s
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    ulimits:
+      nofile:
+        soft: 4096
+        hard: 8192
+    ports:
+      - "${OMADA_MANAGE_HTTP_PORT:-8088}:8088/tcp"
+      - "${OMADA_MANAGE_HTTPS_PORT:-8043}:8043/tcp"
+      - "${OMADA_PORTAL_HTTPS_PORT:-8843}:8843/tcp"
+      - "19810:19810/udp"
+      - "27001:27001/udp"
+      - "29810:29810/udp"
+      - "29811-29817:29811-29817/tcp"
+    networks:
+      - omada-internal
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      JAVA_MIN_HEAP: ${JAVA_MIN_HEAP:-128m}
+      JAVA_MAX_HEAP: ${JAVA_MAX_HEAP:-1024m}
+      OMADA_MONGODB_URI: "mongodb://${OMADA_MONGO_USER:-omada}:${OMADA_MONGO_PASSWORD}@mongodb:27017/omada?authSource=omada"
+      OMADA_MANAGE_HTTP_PORT: 8088
+      OMADA_MANAGE_HTTPS_PORT: 8043
+      OMADA_PORTAL_HTTP_PORT: 8088
+      OMADA_PORTAL_HTTPS_PORT: 8843
+      OMADA_UPGRADE_HTTPS_PORT: 8043
+      OMADA_WEB_CONFIG_OVERRIDE: ${OMADA_WEB_CONFIG_OVERRIDE:-false}
+    volumes:
+      - omada-data:/opt/omada/data
+      - omada-logs:/opt/omada/logs
+      - ../certs:/cert:ro
+
+networks:
+  omada-internal:
+
+volumes:
+  omada-data:
+  omada-logs:
+  omada-mongo-data:
+  omada-mongo-config:
