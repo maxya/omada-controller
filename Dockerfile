@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=eclipse-temurin:17-jre-jammy
+ARG BASE_IMAGE=eclipse-temurin:17-jre-noble
 FROM ${BASE_IMAGE}
 
 ARG OMADA_VERSION=6.2.10.17

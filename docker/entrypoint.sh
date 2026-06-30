@@ -3,7 +3,7 @@ set -euo pipefail
 
 OMADA_HOME="${OMADA_HOME:-/opt/omada}"
 
-# shellcheck source=/usr/local/bin/version-guard.sh
+# shellcheck disable=SC1091
 source /usr/local/bin/version-guard.sh
 
 restore_properties() {
@@ -65,4 +65,3 @@ build_java_command
 
 echo "INFO: starting Omada controller"
 exec "${JAVA_CMD[@]}"
-

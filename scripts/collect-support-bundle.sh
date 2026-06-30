@@ -31,7 +31,7 @@ if [[ -f "${ENV_FILE}" ]]; then
 fi
 
 docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" config 2>&1 | redact > "${OUT_DIR}/compose-config.redacted" || true
-docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" ps 2>&1 > "${OUT_DIR}/compose-ps.txt" || true
+docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" ps > "${OUT_DIR}/compose-ps.txt" 2>&1 || true
 docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" logs --tail=250 2>&1 | redact > "${OUT_DIR}/compose-logs.redacted" || true
 
 for service in mongodb omada-controller; do
@@ -43,4 +43,3 @@ done
 
 tar -C "$(dirname "${OUT_DIR}")" -czf "${OUT_DIR}.tar.gz" "$(basename "${OUT_DIR}")"
 echo "Support bundle written to ${OUT_DIR}.tar.gz"
-

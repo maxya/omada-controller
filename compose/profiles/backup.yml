@@ -1,6 +1,6 @@
 services:
   mongodb-backup:
-    image: mongodb/mongodb-database-tools:latest
+    image: mongo:8.0
     network_mode: host
     profiles:
       - backup
@@ -25,4 +25,3 @@ services:
           --authenticationDatabase admin \
           --out "$${out}"
         echo "MongoDB backup written to $${out}"
-
