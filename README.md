@@ -6,6 +6,14 @@ This project is a clean, source-built alternative for running Omada Controller i
 
 > Unofficial project. TP-Link Omada Software Controller is proprietary software downloaded from TP-Link. This repository packages and operates it; it does not redistribute or audit TP-Link's application.
 
+## TP-Link Software And Container Images
+
+The repository code is open source, but TP-Link Omada Software Controller is proprietary software. No explicit TP-Link permission to redistribute Omada Controller binaries inside public Docker images was found in the official download page or the Linux `.tar.gz` package. Public container images that include Omada binaries are published only if redistribution permission is confirmed.
+
+Until then, the default workflow builds the image locally from the official TP-Link Linux package URL that you provide in `.env`. The GitHub Actions release workflow includes a GHCR publishing path, but it is gated by the repository variable `TP_LINK_REDISTRIBUTION_OK=true` and should remain disabled unless you have confirmed that publishing images with Omada binaries is allowed.
+
+Official Omada download page: <https://support.omadanetworks.com/us/download/software/omada-controller/>
+
 ## Why This Omada Docker Stack Exists
 
 Many existing Omada Controller Docker images use all-in-one packaging or are no longer maintained. This repository takes a different approach:
@@ -19,7 +27,7 @@ Many existing Omada Controller Docker images use all-in-one packaging or are no 
 
 ## Quickstart
 
-This project currently uses a source-build workflow. Build the controller image locally before starting the stack; `docker compose pull` is not a supported workflow for the local controller image.
+This project currently uses a source-build workflow. Build the controller image locally before starting the stack.
 
 ```sh
 cp .env.example .env
@@ -129,7 +137,7 @@ See [backup-restore.md](docs/backup-restore.md) and [upgrades.md](docs/upgrades.
 
 ## Intentionally Unsupported
 
-- Prebuilt public controller images.
+- Prebuilt public controller images unless Omada redistribution permission is confirmed.
 - `latest` controller tags.
 - Embedded MongoDB inside the controller container.
 - Legacy v3/v4/v5 upgrade logic in the entrypoint.

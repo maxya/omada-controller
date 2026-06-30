@@ -1,5 +1,5 @@
 # Release builds must replace mutable image tags with digest-pinned references.
-# This overlay is intentionally separate from the local source-only workflow.
+# This overlay is intentionally separate from the normal source-build workflow.
 #
 # Example:
 # services:
@@ -8,4 +8,3 @@
 #   omada-controller:
 #     image: ghcr.io/<owner>/omada-controller:6.2.10.17@sha256:<digest>
 services: {}
-

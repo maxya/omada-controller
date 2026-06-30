@@ -11,7 +11,7 @@ ARG OMADA_GID=508
 LABEL org.opencontainers.image.title="Omada Controller Compose"
 LABEL org.opencontainers.image.description="Controller-only TP-Link Omada Software Controller image"
 LABEL org.opencontainers.image.version="${OMADA_VERSION}"
-LABEL org.opencontainers.image.source="https://github.com/local/omada-controller"
+LABEL org.opencontainers.image.source="https://github.com/maxya/omada-controller"
 LABEL org.opencontainers.image.licenses="MIT"
 
 ENV OMADA_HOME=/opt/omada

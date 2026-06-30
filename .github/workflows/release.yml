@@ -1,0 +1,141 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      omada_version:
+        description: "Omada version to build, for example 6.2.10.17"
+        required: true
+      omada_url:
+        description: "Official TP-Link artifact URL. Leave empty to use release-manifests/omada-releases.json."
+        required: false
+        default: ""
+      omada_sha256:
+        description: "Trusted artifact SHA256. Leave empty to use release-manifests/omada-releases.json."
+        required: false
+        default: ""
+      publish:
+        description: "Push to GHCR. Requires repository variable TP_LINK_REDISTRIBUTION_OK=true."
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/omada-controller
+  TP_LINK_REDISTRIBUTION_OK: ${{ vars.TP_LINK_REDISTRIBUTION_OK }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Resolve Omada release
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            publish_requested="true"
+            input_url=""
+            input_sha256=""
+          else
+            version="${{ inputs.omada_version }}"
+            publish_requested="${{ inputs.publish }}"
+            input_url="${{ inputs.omada_url }}"
+            input_sha256="${{ inputs.omada_sha256 }}"
+          fi
+
+          if [[ -z "${version}" ]]; then
+            echo "Omada version is required" >&2
+            exit 1
+          fi
+
+          if [[ -n "${input_url}" || -n "${input_sha256}" ]]; then
+            url="${input_url}"
+            sha256="${input_sha256}"
+          else
+            url="$(jq -r --arg version "${version}" '.[$version].url // empty' release-manifests/omada-releases.json)"
+            sha256="$(jq -r --arg version "${version}" '.[$version].sha256 // empty' release-manifests/omada-releases.json)"
+          fi
+
+          if [[ -z "${url}" || -z "${sha256}" ]]; then
+            echo "No release manifest entry found for Omada ${version}; provide omada_url and omada_sha256 manually." >&2
+            exit 1
+          fi
+
+          publish="false"
+          if [[ "${publish_requested}" == "true" ]]; then
+            if [[ "${TP_LINK_REDISTRIBUTION_OK}" != "true" ]]; then
+              echo "Refusing to publish a public image containing TP-Link Omada binaries." >&2
+              echo "Set repository variable TP_LINK_REDISTRIBUTION_OK=true only after confirming redistribution permission." >&2
+              exit 1
+            fi
+            publish="true"
+          fi
+
+          {
+            echo "version=${version}"
+            echo "url=${url}"
+            echo "sha256=${sha256}"
+            echo "publish=${publish}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: steps.release.outputs.publish == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}},value=v${{ steps.release.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ steps.release.outputs.version }}
+            type=semver,pattern={{major}},value=v${{ steps.release.outputs.version }}
+          labels: |
+            org.opencontainers.image.title=Omada Controller Docker Compose
+            org.opencontainers.image.description=TP-Link Omada Software Controller image for Docker Compose with external MongoDB
+            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: ${{ steps.release.outputs.publish == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            OMADA_VERSION=${{ steps.release.outputs.version }}
+            OMADA_URL=${{ steps.release.outputs.url }}
+            OMADA_SHA256=${{ steps.release.outputs.sha256 }}
+
+      - name: Print image tags
+        run: |
+          if [[ "${{ steps.release.outputs.publish }}" == "true" ]]; then
+            echo "Published:"
+          else
+            echo "Built without publishing:"
+          fi
+          echo "${{ steps.meta.outputs.tags }}"

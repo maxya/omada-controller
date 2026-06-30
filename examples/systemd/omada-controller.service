@@ -1,0 +1,18 @@
+[Unit]
+Description=Omada Controller Compose Stack
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/omada-controller
+ExecStart=/usr/bin/docker compose --env-file .env -f compose/docker-compose.host.yml up -d
+ExecStop=/usr/bin/docker compose --env-file .env -f compose/docker-compose.host.yml down
+TimeoutStartSec=0
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target
+

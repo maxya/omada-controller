@@ -12,4 +12,3 @@
   [ "$status" -eq 0 ]
   [[ "$output" == 'local/omada-controller:${OMADA_VERSION:-6.2.10.17}' ]]
 }
-
