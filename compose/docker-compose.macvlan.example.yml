@@ -19,7 +19,7 @@ services:
       - ../certs:/cert:ro
 
   mongodb:
-    image: mongo:8.0
+    image: ${MONGO_IMAGE:-mongo:8.2}
     command: ["--wiredTigerCacheSizeGB", "${MONGO_CACHE_GB:-0.5}"]
     networks:
       - omada-internal

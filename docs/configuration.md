@@ -11,6 +11,22 @@ Important variables:
 - `OMADA_MONGODB_URI`: set by Compose for normal use.
 - `JAVA_MIN_HEAP` and `JAVA_MAX_HEAP`: used by the entrypoint to build the Java command.
 - `MONGO_CACHE_GB`: WiredTiger cache cap.
+- `MONGO_IMAGE`: MongoDB image tag, default `mongo:8.2`.
+
+### MongoDB and Linux kernel 6.19+
+
+`mongo:8.0` and `mongo:8.3` refuse to start on Linux kernel 6.19 and newer, exiting with
+`MongoDB cannot start: Linux kernel versions 6.19 and newer has a known incompatibility`.
+The cause is the bundled TCMalloc violating the kernel rseq ABI
+(<https://jira.mongodb.org/browse/SERVER-121912>); MongoDB added a hard startup check.
+
+Verified on kernel 7.1.4: `mongo:8.2.11` and `mongo:7.0.37` start and pass the healthcheck,
+`mongo:8.0` and `mongo:8.3` do not. The default is therefore `mongo:8.2`.
+
+Note that `8.2` is a minor release, so it stops receiving patches once a later minor ships.
+Once MongoDB relaxes the check on the `8.0` LTS line (<https://jira.mongodb.org/browse/SERVER-125742>
+removes it for kernel 7.0.14+), moving back to `8.0` requires a dump and restore, because MongoDB
+data files cannot be downgraded across major versions.
 - `OMADA_MANAGE_HTTPS_PORT`: login/management HTTPS port.
 
 ## Artifact Settings

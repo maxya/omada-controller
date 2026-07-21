@@ -19,7 +19,7 @@ Official Omada download page: <https://support.omadanetworks.com/us/download/sof
 Many existing Omada Controller Docker images use all-in-one packaging or are no longer maintained. This repository takes a different approach:
 
 - Controller-only Docker image: no bundled MongoDB server inside the Omada container.
-- External MongoDB service: official `mongo:8.0`, authentication enabled, separate volumes and healthcheck.
+- External MongoDB service: official `mongo:8.2` (override the tag with `MONGO_IMAGE`), authentication enabled, separate volumes and healthcheck.
 - Docker Compose first: host-mode default for LAN discovery and adoption, bridge/macvlan examples for advanced users.
 - Safe operations: preflight checks, backup workflow, support bundle, password rotation, and downgrade guard.
 - Explicit Omada versions: no `latest` tag workflow and no automatic major-version upgrades.
@@ -51,7 +51,7 @@ Configure Omada automatic backups in the UI immediately after first login.
 | --- | --- |
 | Controller | Locally built as `local/omada-controller:${OMADA_VERSION}` |
 | Omada version | `6.2.10.17` |
-| Database | External `mongo:8.0` service |
+| Database | External `mongo:8.2` service (`MONGO_IMAGE`) |
 | MongoDB exposure | Bound to `127.0.0.1` in host mode |
 | Networking | Host mode for easiest Omada device discovery and adoption |
 | Data volumes | Separate Omada data, Omada logs, MongoDB data, MongoDB config |
@@ -62,7 +62,9 @@ Configure Omada automatic backups in the UI immediately after first login.
 
 - Docker Engine with Compose v2.
 - `linux/amd64`.
-- CPU support required by MongoDB 8.0.
+- CPU support required by MongoDB 8 (AVX).
+- Linux kernel 6.19 or newer requires `MONGO_IMAGE=mongo:8.2` or newer-with-fix. `mongo:8.0` refuses
+  to start on those kernels (SERVER-121912); see `docs/configuration.md`.
 - Official TP-Link Omada Linux `.tar.gz` artifact URL.
 - Strong MongoDB passwords in `.env`.
 
@@ -131,7 +133,7 @@ See [backup-restore.md](docs/backup-restore.md) and [upgrades.md](docs/upgrades.
 
 - Clean Omada v6 installs.
 - Docker Compose v2.
-- MongoDB 8.0.
+- MongoDB 8 (default `mongo:8.2`).
 - `linux/amd64`.
 - Local source builds from explicit TP-Link artifact URLs or staged artifacts.
 

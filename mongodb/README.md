@@ -1,6 +1,6 @@
 # MongoDB
 
-The default stack uses the official `mongo:8.0` image with authentication enabled. Initialization scripts under `mongodb/init/` run only when `/data/db` is empty.
+The default stack uses the official `mongo:8.2` image (override the tag with `MONGO_IMAGE` in `.env`) with authentication enabled. Initialization scripts under `mongodb/init/` run only when `/data/db` is empty.
 
 Changing passwords in `.env` after first boot does not update existing MongoDB users. Use `make rotate-mongo-password USER=omada` or `USER=omada_backup` so MongoDB and local configuration are changed together.
 

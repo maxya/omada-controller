@@ -40,3 +40,33 @@ teardown() {
   [ "$status" -eq 0 ]
 }
 
+
+@test "render-properties does not fuse a key onto a file with no trailing newline" {
+  # TP-Link ships omada.properties without a trailing newline. Appending to it
+  # naively produces "client.cluster.sync.interval.second=30web.config.override=false",
+  # which aborts controller startup with a NumberFormatException.
+  printf 'client.cluster.sync.interval.second=30' > "${TMP_DIR}/omada.properties"
+
+  OMADA_PROPERTIES_FILE="${TMP_DIR}/omada.properties" \
+    OMADA_MONGODB_URI="mongodb://omada:pw@127.0.0.1:27017/omada?authSource=omada" \
+    run ./docker/render-properties.sh
+
+  [ "$status" -eq 0 ]
+  [ "$(grep -c '^client.cluster.sync.interval.second=30$' "${TMP_DIR}/omada.properties")" -eq 1 ]
+  [ "$(grep -c '^web.config.override=false$' "${TMP_DIR}/omada.properties")" -eq 1 ]
+  ! grep -q '30web.config.override' "${TMP_DIR}/omada.properties"
+}
+
+@test "render-properties leaves an already newline-terminated file intact" {
+  printf 'client.cluster.sync.interval.second=30\n' > "${TMP_DIR}/omada.properties"
+
+  OMADA_PROPERTIES_FILE="${TMP_DIR}/omada.properties" \
+    OMADA_MONGODB_URI="mongodb://omada:pw@127.0.0.1:27017/omada?authSource=omada" \
+    run ./docker/render-properties.sh
+
+  [ "$status" -eq 0 ]
+  [ "$(grep -c '^client.cluster.sync.interval.second=30$' "${TMP_DIR}/omada.properties")" -eq 1 ]
+  [ "$(grep -c '^web.config.override=false$' "${TMP_DIR}/omada.properties")" -eq 1 ]
+  # No stray blank line should be introduced when the file was already terminated.
+  [ "$(grep -c '^$' "${TMP_DIR}/omada.properties")" -eq 0 ]
+}

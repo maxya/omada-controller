@@ -49,7 +49,7 @@ smoke: ## Check running stack and Omada login endpoint
 lint: ## Run lightweight local lint checks
 	bash -n docker/*.sh scripts/*.sh
 	@if command -v shellcheck >/dev/null 2>&1; then shellcheck docker/*.sh scripts/*.sh; else echo "WARN: shellcheck not installed; skipped"; fi
-	@if command -v yq >/dev/null 2>&1; then yq e '.' compose/*.yml compose/profiles/*.yml >/dev/null; else echo "WARN: yq not installed; skipped YAML parse"; fi
+	@./scripts/lint-yaml.sh
 
 .PHONY: backup
 backup: ## Stop controller, run authenticated MongoDB dump, restart controller

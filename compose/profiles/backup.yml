@@ -1,6 +1,6 @@
 services:
   mongodb-backup:
-    image: mongo:8.0
+    image: ${MONGO_IMAGE:-mongo:8.2}
     network_mode: host
     profiles:
       - backup

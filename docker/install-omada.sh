@@ -71,12 +71,25 @@ verify_artifact() {
   fi
 }
 
+ensure_trailing_newline() {
+  local file="$1"
+
+  # TP-Link ships omada.properties without a trailing newline on its last line.
+  # Appending to it directly fuses the new key onto that final value, producing
+  # entries like "client.cluster.sync.interval.second=30web.config.override=false",
+  # which the controller then fails to parse as an Integer and aborts startup.
+  if [[ -s "${file}" ]] && [[ -n "$(tail -c 1 "${file}")" ]]; then
+    printf '\n' >> "${file}"
+  fi
+}
+
 append_property_if_missing() {
   local key="$1"
   local value="$2"
   local file="${OMADA_HOME}/properties/omada.properties"
 
   if ! grep -q "^${key}=" "${file}"; then
+    ensure_trailing_newline "${file}"
     printf '%s=%s\n' "${key}" "${value}" >> "${file}"
   fi
 }

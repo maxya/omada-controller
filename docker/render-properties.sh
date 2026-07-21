@@ -8,6 +8,16 @@ redact_mongo_uri() {
   sed -E 's#(mongodb://[^:/@]+:)[^@]+(@)#\1*****\2#g' <<< "$1"
 }
 
+ensure_trailing_newline() {
+  local file="$1"
+
+  # A properties file whose last byte is not a newline would fuse the next
+  # appended key onto its final value. TP-Link ships omada.properties that way.
+  if [[ -s "${file}" ]] && [[ -n "$(tail -c 1 "${file}")" ]]; then
+    printf '\n' >> "${file}"
+  fi
+}
+
 set_property() {
   local key="$1"
   local value="$2"
@@ -19,6 +29,7 @@ set_property() {
   if grep -q "^${key}=" "${PROPERTIES_FILE}"; then
     sed -i "s/^${key}=.*/${key}=${escaped_value}/" "${PROPERTIES_FILE}"
   else
+    ensure_trailing_newline "${PROPERTIES_FILE}"
     printf '%s=%s\n' "${key}" "${value}" >> "${PROPERTIES_FILE}"
   fi
 
