@@ -1,7 +1,8 @@
 services:
   mongodb-backup:
     image: ${MONGO_IMAGE:-mongo:8.2}
-    network_mode: host
+    networks:
+      - omada-controller
     profiles:
       - backup
     environment:
@@ -18,10 +19,14 @@ services:
         out="$${BACKUP_DIR}/mongodb/$${ts}"
         mkdir -p "$${out}"
         mongodump \
-          --host 127.0.0.1 \
+          --host mongodb \
           --port 27017 \
           --username "$${OMADA_MONGO_BACKUP_USER}" \
           --password "$${OMADA_MONGO_BACKUP_PASSWORD}" \
           --authenticationDatabase admin \
           --out "$${out}"
         echo "MongoDB backup written to $${out}"
+
+networks:
+  omada-controller:
+    name: omada-controller

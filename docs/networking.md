@@ -4,13 +4,32 @@
 
 `compose/docker-compose.host.yml` is the default. The controller uses `network_mode: host` so Omada discovery and adoption traffic behaves like a bare-metal controller on the LAN.
 
-MongoDB also uses host networking in this mode, but it is explicitly bound to `127.0.0.1`:
+MongoDB does not publish a host port in this mode. It runs on a dedicated Docker bridge network, and the host-networked controller reaches it through a stable private container address:
 
 ```yaml
-command: ["--bind_ip", "127.0.0.1", "--wiredTigerCacheSizeGB", "${MONGO_CACHE_GB:-0.5}"]
+networks:
+  omada-controller:
+    name: omada-controller
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${OMADA_MONGO_SUBNET:-172.28.0.0/24}
 ```
 
-Do not remove this binding unless you intentionally want MongoDB reachable outside the host and have firewall rules in place.
+The default MongoDB address is `${OMADA_MONGO_IPV4:-172.28.0.10}`. Override `OMADA_MONGO_SUBNET` and `OMADA_MONGO_IPV4` if that subnet overlaps another local Docker or LAN route. Do not add a MongoDB `ports:` mapping unless you intentionally want the database reachable from the host or LAN and have firewall rules in place.
+
+If `make up` fails with `Pool overlaps with other one on this address space`, choose another private subnet and keep the MongoDB IP inside it:
+
+```env
+OMADA_MONGO_SUBNET=172.31.240.0/24
+OMADA_MONGO_IPV4=172.31.240.10
+```
+
+To inspect existing Docker network pools:
+
+```sh
+docker network inspect $(docker network ls -q) --format '{{.Name}} {{range .IPAM.Config}}{{.Subnet}} {{end}}'
+```
 
 Use host mode when:
 
@@ -44,7 +63,7 @@ Use macvlan only after adjusting the example for your subnet, gateway, parent in
 
 ## IPv6
 
-This stack is IPv4-first. Omada discovery and adoption workflows are mostly IPv4-centric, and the default MongoDB URI uses `127.0.0.1` to avoid Java resolving `localhost` to `::1` on hosts where MongoDB is not bound to IPv6.
+This stack is IPv4-first. Omada discovery and adoption workflows are mostly IPv4-centric, and the default host-mode MongoDB URI uses the private IPv4 address assigned on the `omada-controller` Docker bridge.
 
 ## Port Summary
 

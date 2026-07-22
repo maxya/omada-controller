@@ -9,7 +9,7 @@ services:
     stop_grace_period: 90s
     restart: unless-stopped
     networks:
-      - omada-internal
+      - omada-controller
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?set MONGO_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set MONGO_ROOT_PASSWORD}
@@ -59,7 +59,7 @@ services:
       - "29810:29810/udp"
       - "29811-29817:29811-29817/tcp"
     networks:
-      - omada-internal
+      - omada-controller
     environment:
       TZ: ${TZ:-Etc/UTC}
       JAVA_MIN_HEAP: ${JAVA_MIN_HEAP:-128m}
@@ -77,7 +77,8 @@ services:
       - ../certs:/cert:ro
 
 networks:
-  omada-internal:
+  omada-controller:
+    name: omada-controller
 
 volumes:
   omada-data:

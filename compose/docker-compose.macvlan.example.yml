@@ -10,7 +10,7 @@ services:
     networks:
       omada-lan:
         ipv4_address: 192.168.1.10
-      omada-internal:
+      omada-controller:
     environment:
       OMADA_MONGODB_URI: "mongodb://${OMADA_MONGO_USER:-omada}:${OMADA_MONGO_PASSWORD}@mongodb:27017/omada?authSource=omada"
     volumes:
@@ -22,7 +22,7 @@ services:
     image: ${MONGO_IMAGE:-mongo:8.2}
     command: ["--wiredTigerCacheSizeGB", "${MONGO_CACHE_GB:-0.5}"]
     networks:
-      - omada-internal
+      - omada-controller
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?set MONGO_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set MONGO_ROOT_PASSWORD}
@@ -37,7 +37,8 @@ services:
       - ../mongodb/init:/docker-entrypoint-initdb.d:ro
 
 networks:
-  omada-internal:
+  omada-controller:
+    name: omada-controller
   omada-lan:
     driver: macvlan
     driver_opts:

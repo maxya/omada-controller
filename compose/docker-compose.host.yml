@@ -4,11 +4,11 @@ services:
   mongodb:
     image: ${MONGO_IMAGE:-mongo:8.2}
     command:
-      - "--bind_ip"
-      - "127.0.0.1"
       - "--wiredTigerCacheSizeGB"
       - "${MONGO_CACHE_GB:-0.5}"
-    network_mode: host
+    networks:
+      omada-controller:
+        ipv4_address: ${OMADA_MONGO_IPV4:-172.28.0.10}
     stop_grace_period: 90s
     restart: unless-stopped
     environment:
@@ -61,7 +61,7 @@ services:
       TZ: ${TZ:-Etc/UTC}
       JAVA_MIN_HEAP: ${JAVA_MIN_HEAP:-128m}
       JAVA_MAX_HEAP: ${JAVA_MAX_HEAP:-1024m}
-      OMADA_MONGODB_URI: "mongodb://${OMADA_MONGO_USER:-omada}:${OMADA_MONGO_PASSWORD}@127.0.0.1:27017/omada?authSource=omada"
+      OMADA_MONGODB_URI: "mongodb://${OMADA_MONGO_USER:-omada}:${OMADA_MONGO_PASSWORD}@${OMADA_MONGO_IPV4:-172.28.0.10}:27017/omada?authSource=omada"
       OMADA_MANAGE_HTTP_PORT: ${OMADA_MANAGE_HTTP_PORT:-8088}
       OMADA_MANAGE_HTTPS_PORT: ${OMADA_MANAGE_HTTPS_PORT:-8043}
       OMADA_PORTAL_HTTP_PORT: ${OMADA_PORTAL_HTTP_PORT:-8088}
@@ -77,6 +77,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+networks:
+  omada-controller:
+    name: omada-controller
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${OMADA_MONGO_SUBNET:-172.28.0.0/24}
 
 volumes:
   omada-data:

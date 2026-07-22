@@ -52,7 +52,7 @@ Configure Omada automatic backups in the UI immediately after first login.
 | Controller | Locally built as `local/omada-controller:${OMADA_VERSION}` |
 | Omada version | `6.2.10.17` |
 | Database | External `mongo:8.2` service (`MONGO_IMAGE`) |
-| MongoDB exposure | Bound to `127.0.0.1` in host mode |
+| MongoDB exposure | Private Docker bridge network, no host port |
 | Networking | Host mode for easiest Omada device discovery and adoption |
 | Data volumes | Separate Omada data, Omada logs, MongoDB data, MongoDB config |
 | Java runtime | Java 17 |
@@ -79,9 +79,13 @@ OMADA_SHA256=
 MONGO_ROOT_PASSWORD=change-this-root-password
 OMADA_MONGO_PASSWORD=change-this-omada-password
 OMADA_MONGO_BACKUP_PASSWORD=change-this-backup-password
+OMADA_MONGO_SUBNET=172.28.0.0/24
+OMADA_MONGO_IPV4=172.28.0.10
 ```
 
 Use `OMADA_SHA256` when a trusted checksum is available. If no checksum is available, the build records trust-on-first-use artifact metadata.
+
+If Docker reports `Pool overlaps with other one on this address space`, change `OMADA_MONGO_SUBNET` and `OMADA_MONGO_IPV4` together, for example `172.31.240.0/24` and `172.31.240.10`.
 
 ## Commands
 
@@ -89,7 +93,7 @@ Run `make help` for the full command contract.
 
 | Command | Purpose |
 | --- | --- |
-| `make preflight` | Validate Docker, Compose, `.env`, ports, MongoDB bind address, and CPU compatibility |
+| `make preflight` | Validate Docker, Compose, `.env`, controller ports, MongoDB exposure, and CPU compatibility |
 | `make build` | Build `local/omada-controller:${OMADA_VERSION}` |
 | `make up` | Start the host-mode Omada Controller and MongoDB stack |
 | `make up-bridge` | Start the bridge-mode stack for advanced deployments |
@@ -105,7 +109,7 @@ Run `make help` for the full command contract.
 Host networking is the default because Omada adoption and discovery are LAN-native workflows. In host mode:
 
 - Omada Controller binds directly on the Docker host network.
-- MongoDB is still bound to `127.0.0.1`.
+- MongoDB runs on a dedicated Docker bridge network with no host port mapping.
 - Device discovery and adoption behave closest to a bare-metal controller.
 
 Bridge mode is available, but adoption usually requires DHCP Option 138, a manual Inform URL, or TP-Link's discovery utility. See [networking.md](docs/networking.md) and [adoption.md](docs/adoption.md).

@@ -26,7 +26,7 @@ build: ## Build local/omada-controller:<OMADA_VERSION>
 	docker compose --env-file $(ENV_FILE) -f $(COMPOSE_HOST) build omada-controller
 
 .PHONY: up
-up: ## Start the host-mode stack
+up: preflight ## Start the host-mode stack
 	docker compose --env-file $(ENV_FILE) -f $(COMPOSE_HOST) up -d
 
 .PHONY: up-bridge
