@@ -30,12 +30,12 @@ services:
       start_period: 30s
 
   omada-controller:
-    image: local/omada-controller:${OMADA_VERSION:-6.2.10.17}
+    image: local/omada-controller:${OMADA_VERSION:-6.3.0.45}
     build:
       context: ..
       dockerfile: Dockerfile
       args:
-        OMADA_VERSION: ${OMADA_VERSION:-6.2.10.17}
+        OMADA_VERSION: ${OMADA_VERSION:-6.3.0.45}
         OMADA_URL: ${OMADA_URL:?set OMADA_URL}
         OMADA_SHA256: ${OMADA_SHA256:-}
         OMADA_ARTIFACT_PATH: ${OMADA_ARTIFACT_PATH:-}
@@ -54,6 +54,7 @@ services:
       - "${OMADA_MANAGE_HTTP_PORT:-8088}:8088/tcp"
       - "${OMADA_MANAGE_HTTPS_PORT:-8043}:8043/tcp"
       - "${OMADA_PORTAL_HTTPS_PORT:-8843}:8843/tcp"
+      - "8044:8044/tcp"
       - "19810:19810/udp"
       - "27001:27001/udp"
       - "29810:29810/udp"

@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version="$(jq -r 'keys[0]' release-manifests/omada-releases.json)"
+          version="$(jq -r 'keys | sort_by(split(".") | map(tonumber)) | last' release-manifests/omada-releases.json)"
           url="$(jq -r --arg version "${version}" '.[$version].url' release-manifests/omada-releases.json)"
           sha256="$(jq -r --arg version "${version}" '.[$version].sha256' release-manifests/omada-releases.json)"
           {

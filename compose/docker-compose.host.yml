@@ -36,12 +36,12 @@ services:
         max-file: "3"
 
   omada-controller:
-    image: local/omada-controller:${OMADA_VERSION:-6.2.10.17}
+    image: local/omada-controller:${OMADA_VERSION:-6.3.0.45}
     build:
       context: ..
       dockerfile: Dockerfile
       args:
-        OMADA_VERSION: ${OMADA_VERSION:-6.2.10.17}
+        OMADA_VERSION: ${OMADA_VERSION:-6.3.0.45}
         OMADA_URL: ${OMADA_URL:?set OMADA_URL}
         OMADA_SHA256: ${OMADA_SHA256:-}
         OMADA_ARTIFACT_PATH: ${OMADA_ARTIFACT_PATH:-}

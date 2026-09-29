@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=eclipse-temurin:17-jre-noble
 FROM ${BASE_IMAGE}
 
-ARG OMADA_VERSION=6.2.10.17
+ARG OMADA_VERSION=6.3.0.45
 ARG OMADA_URL
 ARG OMADA_SHA256
 ARG OMADA_ARTIFACT_PATH
@@ -53,7 +53,7 @@ RUN chmod 0755 /usr/local/bin/entrypoint.sh /usr/local/bin/healthcheck.sh /usr/l
 
 WORKDIR /opt/omada/lib
 
-EXPOSE 8088 8043 8843 19810/udp 27001/udp 29810/udp 29811 29812 29813 29814 29815 29816 29817
+EXPOSE 8088 8043 8044 8843 19810/udp 27001/udp 29810/udp 29811 29812 29813 29814 29815 29816 29817
 VOLUME ["/opt/omada/data", "/opt/omada/logs"]
 HEALTHCHECK --start-period=5m --interval=30s --timeout=5s --retries=5 CMD ["/usr/local/bin/healthcheck.sh"]
 

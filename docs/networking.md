@@ -71,6 +71,7 @@ Common Omada ports include:
 
 - `8088/tcp`: management HTTP.
 - `8043/tcp`: management HTTPS.
+- `8044/tcp`: `upgrade.es.https.port`, new in 6.3.0.45; by its name, firmware-upgrade HTTPS for ES (Agile) switches.
 - `8843/tcp`: portal HTTPS.
 - `19810/udp`, `27001/udp`, `29810/udp`: discovery-related traffic.
 - `29811-29817/tcp`: device management, adoption, upgrade, transfer, terminal, and monitor traffic.

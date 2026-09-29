@@ -53,6 +53,7 @@ check_ports() {
     "${OMADA_MANAGE_HTTP_PORT:-8088}"
     "${OMADA_MANAGE_HTTPS_PORT:-8043}"
     "${OMADA_PORTAL_HTTPS_PORT:-8843}"
+    8044
     29811
     29812
     29813

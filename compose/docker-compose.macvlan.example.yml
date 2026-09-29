@@ -3,7 +3,7 @@ name: omada-controller
 
 services:
   omada-controller:
-    image: local/omada-controller:${OMADA_VERSION:-6.2.10.17}
+    image: local/omada-controller:${OMADA_VERSION:-6.3.0.45}
     build:
       context: ..
       dockerfile: Dockerfile

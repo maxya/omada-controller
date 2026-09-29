@@ -23,7 +23,7 @@ Many existing Omada Controller Docker images use all-in-one packaging or are no 
 - Docker Compose first: host-mode default for LAN discovery and adoption, bridge/macvlan examples for advanced users.
 - Safe operations: preflight checks, backup workflow, support bundle, password rotation, and downgrade guard.
 - Explicit Omada versions: no `latest` tag workflow and no automatic major-version upgrades.
-- Clean v6 target: starts with Omada Software Controller `6.2.10.17` and avoids legacy v3/v4/v5 entrypoint complexity.
+- Clean v6 target: starts with Omada Software Controller `6.3.0.45` and avoids legacy v3/v4/v5 entrypoint complexity.
 
 ## Quickstart
 
@@ -50,7 +50,7 @@ Configure Omada automatic backups in the UI immediately after first login.
 | Area | Default |
 | --- | --- |
 | Controller | Locally built as `local/omada-controller:${OMADA_VERSION}` |
-| Omada version | `6.2.10.17` |
+| Omada version | `6.3.0.45` |
 | Database | External `mongo:8.2` service (`MONGO_IMAGE`) |
 | MongoDB exposure | Private Docker bridge network, no host port |
 | Networking | Host mode for easiest Omada device discovery and adoption |
@@ -73,7 +73,7 @@ Configure Omada automatic backups in the UI immediately after first login.
 Edit `.env` before building:
 
 ```env
-OMADA_VERSION=6.2.10.17
+OMADA_VERSION=6.3.0.45
 OMADA_URL=https://...
 OMADA_SHA256=
 MONGO_ROOT_PASSWORD=change-this-root-password

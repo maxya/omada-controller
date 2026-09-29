@@ -51,5 +51,5 @@
 @test "host compose controller image matches local tag contract" {
   run yq -r '.services."omada-controller".image' compose/docker-compose.host.yml
   [ "$status" -eq 0 ]
-  [[ "$output" == 'local/omada-controller:${OMADA_VERSION:-6.2.10.17}' ]]
+  [[ "$output" == 'local/omada-controller:${OMADA_VERSION:-6.3.0.45}' ]]
 }

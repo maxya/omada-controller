@@ -3,7 +3,7 @@ SHELL := /usr/bin/env bash
 COMPOSE_HOST := compose/docker-compose.host.yml
 COMPOSE_BRIDGE := compose/docker-compose.bridge.yml
 ENV_FILE := .env
-OMADA_VERSION ?= 6.2.10.17
+OMADA_VERSION ?= 6.3.0.45
 OMADA_VERSION := $(shell if [ -f "$(ENV_FILE)" ]; then sed -n 's/^OMADA_VERSION=//p' "$(ENV_FILE)" | tail -n 1; else printf '%s' "$(OMADA_VERSION)"; fi)
 ROTATE_USER_FOR_TARGET = $(if $(filter command line,$(origin USER)),$(USER),omada)
 
